@@ -27,7 +27,7 @@ import { AVATARS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
   quality: AvatarQuality.Low,
-  avatarName: AVATARS[0].avatar_id,
+  avatarName: "Wayne_20240711",
   knowledgeId: undefined,
   knowledgeBase: `You are an interactive AI avatar assistant with access to a special feature: 
     a colored circle displayed on the screen that you can change. When users ask you to change 
@@ -137,51 +137,49 @@ function InteractiveAvatar() {
   }, [mediaStream, stream]);
 
   return (
-    <div className="w-full flex flex-col gap-4">
-      <div className="flex flex-col rounded-xl bg-zinc-900 overflow-hidden">
-        <div className="relative w-full aspect-video overflow-hidden flex flex-col items-center justify-center">
-          {sessionState !== StreamingAvatarSessionState.INACTIVE ? (
-            <AvatarVideo ref={mediaStream} />
-          ) : (
-            <AvatarConfig config={config} onConfigChange={setConfig} />
-          )}
+    <div className="w-full h-screen flex flex-col items-center bg-black relative overflow-hidden">
+      {sessionState === StreamingAvatarSessionState.INACTIVE ? (
+        <div className="flex flex-col items-center w-full mt-20">
+          <h2 className="text-xl font-bold mb-2 text-white">Voice-Controlled Circle Demo</h2>
+          <p className="text-gray-400 text-center mb-4 text-sm">Start a voice chat with Wayne to change the circle's color</p>
+          <div className="flex flex-row gap-4">
+            <Button onClick={() => startSessionV2(true)} className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-600">
+              Start Voice Chat with Wayne
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-3 items-center justify-center p-4 border-t border-zinc-700 w-full">
-          {sessionState === StreamingAvatarSessionState.CONNECTED ? (
-            <AvatarControls />
-          ) : sessionState === StreamingAvatarSessionState.INACTIVE ? (
-            <div className="flex flex-row gap-4">
-              <Button onClick={() => startSessionV2(true)}>
-                Start Voice Chat
-              </Button>
-              <Button onClick={() => startSessionV2(false)}>
-                Start Text Chat
-              </Button>
-            </div>
-          ) : (
-            <LoadingIcon />
-          )}
+      ) : sessionState === StreamingAvatarSessionState.CONNECTING ? (
+        <div className="flex flex-col items-center w-full mt-20">
+          <LoadingIcon />
+          <p className="text-gray-400 mt-2 text-sm">Connecting to Wayne...</p>
         </div>
-      </div>
-      {sessionState === StreamingAvatarSessionState.CONNECTED && (
-        <>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <MessageHistory />
+      ) : (
+        <div className="flex flex-col items-center w-full mt-10 gap-6">
+          {/* Main content - Colored circle */}
+          <div className="flex flex-col items-center">
+            <ColorCircle 
+              color={circleColor} 
+              size={140}
+              showSuccess={!!lastColorChange && Date.now() - lastColorChange.timestamp < 3000}
+              colorName={lastColorChange?.colorName}
+            />
+            <p className="text-xs text-gray-400 mt-1 text-center max-w-xs">
+              Try saying: "Change the circle to blue" or "Make it red"
+            </p>
+          </div>
+          
+          {/* Avatar in circle */}
+          <div className="flex flex-col items-center">
+            <div className="rounded-full overflow-hidden" style={{ width: '140px', height: '140px' }}>
+              <div className="w-full h-full overflow-hidden">
+                <AvatarVideo ref={mediaStream} circular={true} />
+              </div>
             </div>
-            <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl">
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Voice-Controlled Circle</h3>
-              <ColorCircle 
-                color={circleColor} 
-                showSuccess={!!lastColorChange && Date.now() - lastColorChange.timestamp < 3000}
-                colorName={lastColorChange?.colorName}
-              />
-              <p className="text-sm text-gray-500 mt-4 text-center max-w-xs">
-                Try saying: "Change the circle to blue" or "Make it red"
-              </p>
+            <div className="mt-1 flex justify-center">
+              <AvatarControls />
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

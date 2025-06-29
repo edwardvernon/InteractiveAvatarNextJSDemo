@@ -7,7 +7,11 @@ import { StreamingAvatarSessionState } from "../logic";
 import { CloseIcon } from "../Icons";
 import { Button } from "../Button";
 
-export const AvatarVideo = forwardRef<HTMLVideoElement>(({}, ref) => {
+interface AvatarVideoProps {
+  circular?: boolean;
+}
+
+export const AvatarVideo = forwardRef<HTMLVideoElement, AvatarVideoProps>(({ circular = false }, ref) => {
   const { sessionState, stopAvatar } = useStreamingAvatarSession();
   const { connectionQuality } = useConnectionQuality();
 
@@ -15,12 +19,12 @@ export const AvatarVideo = forwardRef<HTMLVideoElement>(({}, ref) => {
 
   return (
     <>
-      {connectionQuality !== ConnectionQuality.UNKNOWN && (
-        <div className="absolute top-3 left-3 bg-black text-white rounded-lg px-3 py-2">
+      {connectionQuality !== ConnectionQuality.UNKNOWN && !circular && (
+        <div className="absolute top-3 left-3 bg-black text-white rounded-lg px-3 py-2 text-xs">
           Connection Quality: {connectionQuality}
         </div>
       )}
-      {isLoaded && (
+      {isLoaded && !circular && (
         <Button
           className="absolute top-3 right-3 !p-2 bg-zinc-700 bg-opacity-50 z-10"
           onClick={stopAvatar}
@@ -35,7 +39,8 @@ export const AvatarVideo = forwardRef<HTMLVideoElement>(({}, ref) => {
         style={{
           width: "100%",
           height: "100%",
-          objectFit: "contain",
+          objectFit: circular ? "cover" : "contain",
+          objectPosition: circular ? "center top" : "center center",
         }}
       >
         <track kind="captions" />

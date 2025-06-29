@@ -21,7 +21,7 @@ export const AudioInput: React.FC = () => {
   return (
     <div>
       <Button
-        className={`!p-2 relative`}
+        className={`!p-2 relative bg-zinc-800 hover:bg-zinc-700`}
         disabled={isVoiceChatLoading}
         onClick={handleMuteClick}
       >

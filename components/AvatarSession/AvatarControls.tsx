@@ -10,51 +10,29 @@ import { TextInput } from "./TextInput";
 
 export const AvatarControls: React.FC = () => {
   const {
-    isVoiceChatLoading,
     isVoiceChatActive,
-    startVoiceChat,
-    stopVoiceChat,
   } = useVoiceChat();
   const { interrupt } = useInterrupt();
 
   return (
-    <div className="flex flex-col gap-3 relative w-full items-center">
-      <ToggleGroup
-        className={`bg-zinc-700 rounded-lg p-1 ${isVoiceChatLoading ? "opacity-50" : ""}`}
-        disabled={isVoiceChatLoading}
-        type="single"
-        value={isVoiceChatActive || isVoiceChatLoading ? "voice" : "text"}
-        onValueChange={(value) => {
-          if (value === "voice" && !isVoiceChatActive && !isVoiceChatLoading) {
-            startVoiceChat();
-          } else if (
-            value === "text" &&
-            isVoiceChatActive &&
-            !isVoiceChatLoading
-          ) {
-            stopVoiceChat();
-          }
-        }}
-      >
-        <ToggleGroupItem
-          className="data-[state=on]:bg-zinc-800 rounded-lg p-2 text-sm w-[90px] text-center"
-          value="voice"
-        >
-          Voice Chat
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          className="data-[state=on]:bg-zinc-800 rounded-lg p-2 text-sm w-[90px] text-center"
-          value="text"
-        >
-          Text Chat
-        </ToggleGroupItem>
-      </ToggleGroup>
-      {isVoiceChatActive || isVoiceChatLoading ? <AudioInput /> : <TextInput />}
-      <div className="absolute top-[-70px] right-3">
-        <Button className="!bg-zinc-700 !text-white" onClick={interrupt}>
-          Interrupt
-        </Button>
-      </div>
+    <div className="flex gap-2 items-center justify-center">
+      {isVoiceChatActive && (
+        <>
+          <AudioInput />
+          <Button 
+            className="!bg-zinc-700 !text-white !p-2 rounded-full" 
+            onClick={interrupt}
+            title="Interrupt"
+          >
+            <span className="sr-only">Interrupt</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+          </Button>
+        </>
+      )}
     </div>
   );
 };
