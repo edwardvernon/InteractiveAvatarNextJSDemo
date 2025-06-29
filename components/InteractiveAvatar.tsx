@@ -19,33 +19,36 @@ import { useVoiceChat } from "./logic/useVoiceChat";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
-import { ColorCircle } from "./ColorCircle";
-import { useColorCommands } from "./logic/useColorCommands";
+import { InteractionCanvas } from "./InteractionCanvas";
+import { useCursorCommands } from "./logic/useCursorCommands";
 import { useStreamingAvatarContext } from "./logic";
 
 import { AVATARS } from "@/app/lib/constants";
 
 const DEFAULT_CONFIG: StartAvatarRequest = {
-  quality: AvatarQuality.Low,
-  avatarName: "Wayne_20240711",
-  knowledgeId: undefined,
-  knowledgeBase: `You are an interactive AI avatar assistant with access to a special feature: 
-    a colored circle displayed on the screen that you can change. When users ask you to change 
-    the circle's color (e.g., "make the circle red" or "change the circle to blue"), you should 
-    acknowledge that you've changed the color and confirm which color it now is. The circle will 
-    automatically change color when users make these requests. Available colors include red, blue, 
-    green, yellow, purple, orange, pink, brown, black, white, and many other standard colors. 
-    Always respond as if you have the ability to change the circle's color directly.`,
+  quality: AvatarQuality.High,
+  avatarName: AVATARS[0].avatar_id,
   voice: {
     rate: 1.5,
     emotion: VoiceEmotion.EXCITED,
-    model: ElevenLabsModel.eleven_flash_v2_5,
   },
   language: "en",
   voiceChatTransport: VoiceChatTransport.WEBSOCKET,
   sttSettings: {
     provider: STTProvider.DEEPGRAM,
   },
+  knowledgeBase: `You are an AI assistant integrated with a voice-controlled cursor interface. The user can see two buttons on their screen: Button A and Button B.
+    
+    When the user asks you to click on a button, you should acknowledge their request naturally. The system will automatically move a ghost cursor to the button and click it.
+    
+    Common commands include:
+    - "Click on button A" or "Press button A"
+    - "Click on button B" or "Press button B"
+    - "Click A" or "Click B"
+    
+    Always confirm when you understand a click request, and acknowledge that you're clicking the requested button.
+    
+    Be conversational and friendly in your responses.`
 };
 
 function InteractiveAvatar() {
@@ -54,8 +57,15 @@ function InteractiveAvatar() {
   const { startVoiceChat } = useVoiceChat();
   const { circleColor } = useStreamingAvatarContext();
   
-  // Enable color command processing
-  const { lastColorChange } = useColorCommands();
+  // Enable cursor command processing
+  const { 
+    cursorPosition, 
+    isMoving, 
+    lastButtonClick, 
+    registerButton,
+    registerCanvas,
+    processCommand 
+  } = useCursorCommands();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
 
@@ -155,18 +165,14 @@ function InteractiveAvatar() {
         </div>
       ) : (
         <div className="flex flex-col items-center w-full mt-10 gap-6">
-          {/* Main content - Colored circle */}
-          <div className="flex flex-col items-center">
-            <ColorCircle 
-              color={circleColor} 
-              size={140}
-              showSuccess={!!lastColorChange && Date.now() - lastColorChange.timestamp < 3000}
-              colorName={lastColorChange?.colorName}
-            />
-            <p className="text-xs text-gray-400 mt-1 text-center max-w-xs">
-              Try saying: "Change the circle to blue" or "Make it red"
-            </p>
-          </div>
+          {/* Main content - Interactive Canvas */}
+          <InteractionCanvas
+            registerButton={registerButton}
+            lastButtonClick={lastButtonClick}
+            cursorPosition={cursorPosition}
+            isMoving={isMoving}
+            onCanvasReady={registerCanvas}
+          />
           
           {/* Avatar in circle */}
           <div className="flex flex-col items-center">
