@@ -61,6 +61,9 @@ type StreamingAvatarContextProps = {
 
   connectionQuality: ConnectionQuality;
   setConnectionQuality: (connectionQuality: ConnectionQuality) => void;
+
+  circleColor: string;
+  setCircleColor: (color: string) => void;
 };
 
 const StreamingAvatarContext = React.createContext<StreamingAvatarContextProps>(
@@ -89,6 +92,8 @@ const StreamingAvatarContext = React.createContext<StreamingAvatarContextProps>(
     setIsAvatarTalking: () => {},
     connectionQuality: ConnectionQuality.UNKNOWN,
     setConnectionQuality: () => {},
+    circleColor: "#3B82F6",
+    setCircleColor: () => {},
   },
 );
 
@@ -219,6 +224,12 @@ const useStreamingAvatarConnectionQualityState = () => {
   return { connectionQuality, setConnectionQuality };
 };
 
+const useStreamingAvatarCircleColorState = () => {
+  const [circleColor, setCircleColor] = useState("#3B82F6");
+
+  return { circleColor, setCircleColor };
+};
+
 export const StreamingAvatarProvider = ({
   children,
   basePath,
@@ -233,6 +244,7 @@ export const StreamingAvatarProvider = ({
   const listeningState = useStreamingAvatarListeningState();
   const talkingState = useStreamingAvatarTalkingState();
   const connectionQualityState = useStreamingAvatarConnectionQualityState();
+  const circleColorState = useStreamingAvatarCircleColorState();
 
   return (
     <StreamingAvatarContext.Provider
@@ -245,6 +257,7 @@ export const StreamingAvatarProvider = ({
         ...listeningState,
         ...talkingState,
         ...connectionQualityState,
+        ...circleColorState,
       }}
     >
       {children}

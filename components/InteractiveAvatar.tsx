@@ -19,6 +19,9 @@ import { useVoiceChat } from "./logic/useVoiceChat";
 import { StreamingAvatarProvider, StreamingAvatarSessionState } from "./logic";
 import { LoadingIcon } from "./Icons";
 import { MessageHistory } from "./AvatarSession/MessageHistory";
+import { ColorCircle } from "./ColorCircle";
+import { useColorCommands } from "./logic/useColorCommands";
+import { useStreamingAvatarContext } from "./logic";
 
 import { AVATARS } from "@/app/lib/constants";
 
@@ -42,6 +45,10 @@ function InteractiveAvatar() {
   const { initAvatar, startAvatar, stopAvatar, sessionState, stream } =
     useStreamingAvatarSession();
   const { startVoiceChat } = useVoiceChat();
+  const { circleColor } = useStreamingAvatarContext();
+  
+  // Enable color command processing
+  const { lastColorChange } = useColorCommands();
 
   const [config, setConfig] = useState<StartAvatarRequest>(DEFAULT_CONFIG);
 
@@ -150,7 +157,24 @@ function InteractiveAvatar() {
         </div>
       </div>
       {sessionState === StreamingAvatarSessionState.CONNECTED && (
-        <MessageHistory />
+        <>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <MessageHistory />
+            </div>
+            <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Voice-Controlled Circle</h3>
+              <ColorCircle 
+                color={circleColor} 
+                showSuccess={!!lastColorChange && Date.now() - lastColorChange.timestamp < 3000}
+                colorName={lastColorChange?.colorName}
+              />
+              <p className="text-sm text-gray-500 mt-4 text-center max-w-xs">
+                Try saying: "Change the circle to blue" or "Make it red"
+              </p>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
